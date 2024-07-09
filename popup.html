@@ -1,13 +1,38 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Survey Auto-Fill</title>
-  </head>
-  
-  <body>
-    <h1>My Chrome Extension</h1>
-    <button id="fetch">Fetch Data</button>
-    <div id="result"></div>
-    <script src="popup.js"></script>
-  </body>
+<head>
+  <title>Survey Boost</title>
+  <style>
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="initial-popup" class="hidden">
+    <h1>Survey Boost Login</h1>
+    <input type="text" id="surveyBoostUsername" placeholder="Username">
+    <input type="password" id="surveyBoostPassword" placeholder="Password">
+    <button id="submitLogin">Submit</button>
+  </div>
+
+  <div id="main-popup" class="hidden">
+    <h1>Survey Boost</h1>
+    <div>
+      <h4>Survey Junkie</h4>
+      <button id="connectButton">Connect</button>
+    </div>
+  </div>
+
+  <div id="login-popup" class="hidden">
+    <h1>Survey Junkie Login</h1>
+    <input type="text" id="surveyJunkieEmail" placeholder="Email">
+    <input type="password" id="surveyJunkiePassword" placeholder="Password">
+    <button id="submitLogin">Submit</button>
+    <button id="cancelLogin">Cancel</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
 </html>
