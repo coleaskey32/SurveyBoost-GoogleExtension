@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
+
+  let userID = null;  // Variable to store the user ID
+
   const initialPopup = document.getElementById('initial-popup');
   const mainPopup = document.getElementById('main-popup');
   const loginPopup = document.getElementById('login-popup');
@@ -31,18 +34,23 @@ document.addEventListener('DOMContentLoaded', function () {
         body: JSON.stringify({ username, password }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to authenticate Survey Boost credentials');
+      const responseData = await response.json();
+
+      if (responseData.error) {
+        throw new Error(responseData.error || 'Failed to authenticate Survey Boost credentials');
       }
       console.log('Survey Boost credentials authenticated.');
+
+      userID = responseData.user_id;
 
       // Hide initial login popup and show main content
       initialPopup.classList.add('hidden');
       mainPopup.classList.remove('hidden');
+
     } catch (error) {
       console.error('Error authenticating Survey Boost credentials:', error);
       // Handle error (optional)
-      alert('Error authenticating Survey Boost credentials. Please try again.');
+      alert("Invalid Username or Password");
     }
   });
 
@@ -76,7 +84,12 @@ document.addEventListener('DOMContentLoaded', function () {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ survey_site: 'Survey Junkie', email, password }),
+        body: JSON.stringify({ 
+          user_id: userID,
+          survey_site: 'Survey Junkie', 
+          emai: email, 
+          password: password 
+        }),
       });
 
       if (!response.ok) {
