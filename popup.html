@@ -6,6 +6,11 @@
     .hidden {
       display: none;
     }
+    body {
+      width: 200px; /* Set the desired width */
+      height: 200px; /* Set the desired height */
+      padding: 20px; /* Optional: Add padding for better styling */
+    }
   </style>
 </head>
 <body>
@@ -20,8 +25,9 @@
   <div id="main-popup" class="hidden">
     <h1>Survey Boost</h1>
     <div>
-      <h4>Survey Junkie</h4>
-      <button id="connectButton">Connect</button>
+      <h2>Survey Junkie</h2>
+      <button id="connectButton" class="hidden">Connect</button>
+      <h3 id="surveyJunkieEarnings" class="hidden">$0</h3>
     </div>
   </div>
 
@@ -34,5 +40,6 @@
   </div>
 
   <script src="popup.js"></script>
+  <script src="storage.js"></script>
 </body>
 </html>
