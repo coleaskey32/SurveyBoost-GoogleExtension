@@ -1,16 +1,27 @@
 document.addEventListener('DOMContentLoaded', function () {
   let userID = null; // Variable to store the user ID
-  let isSignedIn = false;
 
   const initialPopup = document.getElementById('initial-popup');
   const mainPopup = document.getElementById('main-popup');
-  const loginPopup = document.getElementById('login-popup');
+  const loginPopup = document.getElementById('surveyJunkie-login-popup');
   const connectButton = document.getElementById('connectButton');
   const submitInitialLoginButton =
     document.getElementById('submitInitialLogin');
   const submitLoginButton = document.getElementById('submitLogin');
   const cancelLoginButton = document.getElementById('cancelLogin');
   const surveyJunkieEarnings = document.getElementById('surveyJunkieEarnings');
+
+  // Elements for Swagbucks
+  const swagbucksConnectButton = document.getElementById(
+    'swagbucksConnectButton'
+  );
+  const swagbucksLoginPopup = document.getElementById('swagbucks-login-popup');
+  const swagbucksSubmitLoginButton = document.getElementById(
+    'swagbucksSubmitLogin'
+  );
+  const swagbucksCancelLoginButton = document.getElementById(
+    'swagbucksCancelLogin'
+  );
 
   // Check if user is already signed into Survey Boost
   getFromLocalStorage('userData', function (data) {
@@ -127,52 +138,45 @@ document.addEventListener('DOMContentLoaded', function () {
       email: email,
       password: password,
     });
+  });
 
-    // Check storage for login success
-    setTimeout(() => {
-      chrome.storage.local.get('survey_junkie_successful', async (result) => {
-        const loginSuccess = result.survey_junkie_successful;
-        console.log('HELLLOOO: ', loginSuccess);
-        if (loginSuccess != null) {
-          if (loginSuccess) {
-            try {
-              const response = await fetch(
-                'http://127.0.0.1:8000/api/surveys/register/',
-                {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    user_id: userID,
-                    survey_site: 'Survey Junkie',
-                    email: email,
-                    password: password,
-                  }),
-                }
-              );
+  // Show login popup for Swagbucks when Connect button is clicked
+  swagbucksConnectButton.addEventListener('click', function () {
+    mainPopup.classList.add('hidden');
+    swagbucksLoginPopup.classList.remove('hidden');
+  });
 
-              if (!response.ok) {
-                throw new Error('Failed to save Survey Junkie credentials');
-              }
+  // Handle canceling Swagbucks login
+  swagbucksCancelLoginButton.addEventListener('click', function () {
+    swagbucksLoginPopup.classList.add('hidden');
+    mainPopup.classList.remove('hidden');
+  });
 
-              console.log('Survey Junkie credentials saved.');
-              saveToLocalStorage('survey_junkie', { email, password, userID });
+  // Handle submitting Swagbucks login credentials
+  swagbucksSubmitLoginButton.addEventListener('click', async function () {
+    const email = document.getElementById('swagbucksEmail').value.trim();
+    const password = document.getElementById('swagbucksPassword').value.trim();
 
-              document.getElementById('loginPopup').classList.add('hidden');
-              document.getElementById('mainPopup').classList.remove('hidden');
-            } catch (error) {
-              console.error('Error saving Survey Junkie credentials:', error);
-              alert(
-                'Error saving Survey Junkie credentials. Please try again.'
-              );
-            }
-          } else {
-            console.log('Login failed, not saving credentials.');
-            alert('Login failed. Please check your email and password.');
-          }
-        }
-      });
-    }, 5000); // Adjust the timeout as needed
+    // Validate email and password input
+    if (!email || !password) {
+      alert('Please enter both email and password.');
+      return;
+    }
+
+    console.log(
+      'UserID: ' + userID,
+      ' Email: ',
+      email,
+      ' Password: ' + password
+    );
+
+    // Run Content Script to see if this is valid credentials on Swagbucks
+    let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    chrome.runtime.sendMessage({
+      action: 'swagbucks_login',
+      tabId: tab.id,
+      email: email,
+      password: password,
+    });
   });
 });

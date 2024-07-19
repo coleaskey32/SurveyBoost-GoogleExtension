@@ -1,45 +1,52 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Survey Boost</title>
-  <style>
-    .hidden {
-      display: none;
-    }
-    body {
-      width: 200px; /* Set the desired width */
-      height: 200px; /* Set the desired height */
-      padding: 20px; /* Optional: Add padding for better styling */
-    }
-  </style>
-</head>
-<body>
-
-  <div id="initial-popup" class="hidden">
-    <h1>Survey Boost Login</h1>
-    <input type="text" id="surveyBoostUsername" placeholder="Username">
-    <input type="password" id="surveyBoostPassword" placeholder="Password">
-    <button id="submitInitialLogin">Submit</button>
-  </div>
-
-  <div id="main-popup" class="hidden">
-    <h1>Survey Boost</h1>
-    <div>
-      <h2>Survey Junkie</h2>
-      <button id="connectButton" class="hidden">Connect</button>
-      <h3 id="surveyJunkieEarnings" class="hidden">$0</h3>
+  <head>
+    <title>Survey Boost</title>
+    <style>
+      .hidden {
+        display: none;
+      }
+      body {
+        width: 200px; /* Set the desired width */
+        height: 200px; /* Set the desired height */
+        padding: 20px; /* Optional: Add padding for better styling */
+      }
+    </style>
+  </head>
+  <body>
+    <div id="initial-popup" class="hidden">
+      <h1>Survey Boost Login</h1>
+      <input type="text" id="surveyBoostUsername" placeholder="Username" />
+      <input type="password" id="surveyBoostPassword" placeholder="Password" />
+      <button id="submitInitialLogin">Submit</button>
     </div>
-  </div>
 
-  <div id="login-popup" class="hidden">
-    <h1>Survey Junkie Login</h1>
-    <input type="text" id="surveyJunkieEmail" placeholder="Email">
-    <input type="password" id="surveyJunkiePassword" placeholder="Password">
-    <button id="submitLogin">Submit</button>
-    <button id="cancelLogin">Cancel</button>
-  </div>
+    <div id="main-popup" class="hidden">
+      <h1>Survey Boost</h1>
+      <div>
+        <h2>Survey Junkie</h2>
+        <button id="connectButton" class="hidden">Connect</button>
+        <h3 id="surveyJunkieEarnings" class="hidden">$0</h3>
+      </div>
+    </div>
 
-  <script src="popup.js"></script>
-  <script src="storage.js"></script>
-</body>
+    <div id="surveyJunkie-login-popup" class="hidden">
+      <h1>Survey Junkie Login</h1>
+      <input type="text" id="surveyJunkieEmail" placeholder="Email" />
+      <input type="password" id="surveyJunkiePassword" placeholder="Password" />
+      <button id="submitLogin">Submit</button>
+      <button id="cancelLogin">Cancel</button>
+    </div>
+
+    <div id="swagbucks-login-popup" class="hidden">
+      <h1>Survey Junkie Login</h1>
+      <input type="text" id="surveyJunkieEmail" placeholder="Email" />
+      <input type="password" id="surveyJunkiePassword" placeholder="Password" />
+      <button id="submitLogin">Submit</button>
+      <button id="cancelLogin">Cancel</button>
+    </div>
+
+    <script src="popup.js"></script>
+    <script src="storage.js"></script>
+  </body>
 </html>

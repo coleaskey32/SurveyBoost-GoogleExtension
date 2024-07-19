@@ -2,16 +2,11 @@
   "manifest_version": 3,
   "name": "Survey Boost",
   "version": "1.0",
-  "permissions": [
-    "storage",
-    "activeTab",
-    "background",
-    "scripting",
-    "tabs"
-  ],
+  "permissions": ["storage", "activeTab", "background", "scripting", "tabs"],
   "host_permissions": [
-        "https://app.surveyjunkie.com/*"
-    ],
+    "https://app.surveyjunkie.com/*",
+    "http://127.0.0.1:8000/*"
+  ],
   "background": {
     "service_worker": "background.js"
   },
@@ -24,7 +19,8 @@
   "action": {
     "default_popup": "popup.html"
   },
-  "icons": {
-  }
-  
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' http://127.0.0.1:8000"
+  },
+  "icons": {}
 }
