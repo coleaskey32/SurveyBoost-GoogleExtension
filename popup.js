@@ -1,5 +1,7 @@
+let userID = null;
+
 document.addEventListener('DOMContentLoaded', function () {
-  let userID = null; // Variable to store the user ID
+  // Variable to store the user ID
 
   const initialPopup = document.getElementById('initial-popup');
   const mainPopup = document.getElementById('main-popup');
@@ -22,12 +24,12 @@ document.addEventListener('DOMContentLoaded', function () {
   const swagbucksCancelLoginButton = document.getElementById(
     'swagbucksCancelLogin'
   );
+  const swagbucksEarnings = document.getElementById('swagbucksEarnings');
 
   // Check if user is already signed into Survey Boost
   getFromLocalStorage('userData', function (data) {
     if (data && data.username && data.password) {
       console.log('User data retrieved:', data);
-      isSignedIn = true;
       userID = data.userID;
 
       // Hide initial login popup and show main content
@@ -35,7 +37,6 @@ document.addEventListener('DOMContentLoaded', function () {
       mainPopup.classList.remove('hidden');
     } else {
       console.log('User is not signed in.');
-      // Show initial login popup when extension opens
       initialPopup.classList.remove('hidden');
     }
   });
@@ -49,7 +50,6 @@ document.addEventListener('DOMContentLoaded', function () {
       .getElementById('surveyBoostPassword')
       .value.trim();
 
-    // Validate username and password input
     if (!username || !password) {
       alert('Please enter both username and password.');
       return;
@@ -77,7 +77,6 @@ document.addEventListener('DOMContentLoaded', function () {
       userID = responseData.user_id;
       saveToLocalStorage('userData', { username, password, userID });
 
-      // Hide initial login popup and show main content
       initialPopup.classList.add('hidden');
       mainPopup.classList.remove('hidden');
     } catch (error) {
@@ -86,6 +85,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
+  // Check Survey Junkie login status
   getFromLocalStorage('survey_junkie', function (data) {
     if (data && data.email && data.password) {
       console.log('Survey Junkie data retrieved:', data);
@@ -117,20 +117,11 @@ document.addEventListener('DOMContentLoaded', function () {
       .getElementById('surveyJunkiePassword')
       .value.trim();
 
-    // Validate email and password input
     if (!email || !password) {
       alert('Please enter both email and password.');
       return;
     }
 
-    console.log(
-      'UserID: ' + userID,
-      ' Email: ',
-      email,
-      ' Password: ' + password
-    );
-
-    // Run Content Script to see if this is valid credentials on Survey Junkie
     let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     chrome.runtime.sendMessage({
       action: 'surveyJunkie_login',
@@ -139,6 +130,11 @@ document.addEventListener('DOMContentLoaded', function () {
       password: password,
     });
   });
+
+  // Check Swagbucks login status
+  checkSwagbucksLoginStatus(1);
+  // Retrieve the swagbuck balance
+  SwagbuckRetrieveAndDisplayBalance();
 
   // Show login popup for Swagbucks when Connect button is clicked
   swagbucksConnectButton.addEventListener('click', function () {
@@ -157,26 +153,108 @@ document.addEventListener('DOMContentLoaded', function () {
     const email = document.getElementById('swagbucksEmail').value.trim();
     const password = document.getElementById('swagbucksPassword').value.trim();
 
-    // Validate email and password input
     if (!email || !password) {
       alert('Please enter both email and password.');
       return;
     }
 
-    console.log(
-      'UserID: ' + userID,
-      ' Email: ',
-      email,
-      ' Password: ' + password
-    );
-
-    // Run Content Script to see if this is valid credentials on Swagbucks
     let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     chrome.runtime.sendMessage({
       action: 'swagbucks_login',
       tabId: tab.id,
+      user_id: userID,
       email: email,
       password: password,
     });
   });
 });
+
+/**************************************************************************************************************/
+
+async function checkSwagbucksLoginStatus(userID) {
+  if (!userID) {
+    console.error('No valid userID provided');
+    return;
+  }
+  try {
+    const response = await fetch(
+      `http://127.0.0.1:8000/api/surveys/user/?user_id=${userID}&survey_site=Swag_Bucks`,
+      { method: 'GET' }
+    );
+
+    if (!response.ok) {
+      // Fetch the response text to diagnose the issue
+      const errorText = await response.text();
+      throw new Error(
+        `Network response was not ok: ${response.statusText}. ${errorText}`
+      );
+    }
+
+    const data = await response.json();
+
+    if (data && data.email && data.password) {
+      console.log('Swagbucks data retrieved:', data);
+      swagbucksConnectButton.classList.add('hidden');
+      swagbucksEarnings.classList.remove('hidden');
+    } else {
+      console.log('User is not signed in to Swagbucks.');
+      swagbucksEarnings.classList.add('hidden');
+      swagbucksConnectButton.classList.remove('hidden');
+    }
+  } catch (error) {
+    console.error('Error checking Swagbucks login status:', error);
+    swagbucksEarnings.classList.add('hidden');
+    swagbucksConnectButton.classList.remove('hidden');
+  }
+}
+async function SwagbuckRetrieveAndDisplayBalance() {
+  const swagbucksEarnings = document.getElementById('swagbucksEarnings');
+  let user_id = 1; // Test
+  let survey_site = 'Swag_Bucks'; // Ensure this matches what you need
+
+  if (swagbucksEarnings) {
+    chrome.storage.local.get(['swagbuck_balance'], async (result) => {
+      if (result.swagbuck_balance) {
+        const { balanceText, rawBalance } = result.swagbuck_balance;
+        const balance = parseInt(rawBalance, 10); // Ensure balance is an integer
+
+        // Display the balanceText in the UI
+        swagbucksEarnings.textContent = `Earnings: ${balanceText}`;
+
+        try {
+          console.log('Attempting to save credentials...');
+          console.log('Type of balance:', typeof balance);
+
+          const response = await fetch(
+            `http://127.0.0.1:8000/api/surveys/update_balance/?user_id=${user_id}&survey_site=${encodeURIComponent(
+              survey_site
+            )}&balance=${balance}`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              // No need for a body since we are using query parameters
+            }
+          );
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(
+              `Failed to save Swagbucks Earnings: ${response.statusText} - ${errorText}`
+            );
+          }
+
+          console.log('Swagbucks Earnings saved.');
+        } catch (error) {
+          console.error('Error saving Swagbucks Earnings:', error);
+          // Optionally, notify the user about the error
+        }
+      } else {
+        swagbucksEarnings.textContent = 'Earnings: Not available';
+      }
+    });
+  } else {
+    console.error('Element with ID "swagbucksEarnings" not found.');
+  }
+}

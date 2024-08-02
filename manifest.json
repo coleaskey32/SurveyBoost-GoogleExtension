@@ -2,10 +2,18 @@
   "manifest_version": 3,
   "name": "Survey Boost",
   "version": "1.0",
-  "permissions": ["storage", "activeTab", "background", "scripting", "tabs"],
+  "permissions": [
+    "storage",
+    "activeTab",
+    "background",
+    "scripting",
+    "tabs",
+    "webNavigation"
+  ],
   "host_permissions": [
     "https://app.surveyjunkie.com/*",
-    "http://127.0.0.1:8000/*"
+    "http://127.0.0.1:8000/*",
+    "https://www.swagbucks.com/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -14,6 +22,11 @@
     {
       "matches": ["https://app.surveyjunkie.com/public/signin"],
       "js": ["content.js"]
+    },
+    {
+      "matches": ["*://www.swagbucks.com/*"],
+      "js": ["content-swagbuck.js"],
+      "run_at": "document_end"
     }
   ],
   "action": {

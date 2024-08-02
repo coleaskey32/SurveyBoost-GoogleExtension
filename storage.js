@@ -2,15 +2,20 @@
 
 // Function to save data to Chrome's local storage
 function saveToLocalStorage(key, value) {
-    chrome.storage.local.set({ [key]: value }, function() {
-      console.log(`${key} is saved to local storage.`);
-    });
-  }
-  
-  // Function to get data from Chrome's local storage
-  function getFromLocalStorage(key, callback) {
-    chrome.storage.local.get([key], function(result) {
-      callback(result[key]);
-    });
-  }
-  
+  chrome.storage.local.set({ [key]: value }, function () {
+    console.log(`${key} is saved to local storage.`);
+  });
+}
+
+// Function to get data from Chrome's local storage
+function getFromLocalStorage(key, callback) {
+  chrome.storage.local.get([key], function (result) {
+    callback(result[key]);
+  });
+}
+
+function clearBalanceFromStorage() {
+  chrome.storage.local.remove('swagbuck_balance', () => {
+    console.log('Balance cleared from storage.');
+  });
+}
