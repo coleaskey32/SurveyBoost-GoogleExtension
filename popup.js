@@ -7,24 +7,24 @@ document.addEventListener('DOMContentLoaded', function () {
   const mainPopup = document.getElementById('main-popup');
   const loginPopup = document.getElementById('surveyJunkie-login-popup');
   const connectButton = document.getElementById('connectButton');
-  const submitInitialLoginButton =
-    document.getElementById('submitInitialLogin');
+  const submitInitialLoginButton = document.getElementById('submitInitialLogin');
   const submitLoginButton = document.getElementById('submitLogin');
   const cancelLoginButton = document.getElementById('cancelLogin');
   const surveyJunkieEarnings = document.getElementById('surveyJunkieEarnings');
 
   // Elements for Swagbucks
-  const swagbucksConnectButton = document.getElementById(
-    'swagbucksConnectButton'
-  );
+  const swagbucksConnectButton = document.getElementById('swagbucksConnectButton');
   const swagbucksLoginPopup = document.getElementById('swagbucks-login-popup');
-  const swagbucksSubmitLoginButton = document.getElementById(
-    'swagbucksSubmitLogin'
-  );
-  const swagbucksCancelLoginButton = document.getElementById(
-    'swagbucksCancelLogin'
-  );
+  const swagbucksSubmitLoginButton = document.getElementById('swagbucksSubmitLogin');
+  const swagbucksCancelLoginButton = document.getElementById('swagbucksCancelLogin');
   const swagbucksEarnings = document.getElementById('swagbucksEarnings');
+
+  // Elements for brandedSurvey
+  const brandedSurveyConnectButton = document.getElementById('brandedSurveyConnectButton');
+  const brandedSurveyLoginPopup = document.getElementById('brandedSurvey-login-popup');
+  const brandedSurveySubmitLoginButton = document.getElementById('brandedSurveySubmitLogin');
+  const brandedSurveyCancelLoginButton = document.getElementById('brandedSurveyCancelLogin');
+  const brandedSurveyEarnings = document.getElementById('brandedSurveyEarnings');
 
   // Check if user is already signed into Survey Boost
   getFromLocalStorage('userData', function (data) {
@@ -85,6 +85,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
+  /***********************************************Survey Junkie***************************************************************/
   // Check Survey Junkie login status
   getFromLocalStorage('survey_junkie', function (data) {
     if (data && data.email && data.password) {
@@ -130,7 +131,8 @@ document.addEventListener('DOMContentLoaded', function () {
       password: password,
     });
   });
-
+  
+  /***********************************************Swag Bucks***************************************************************/
   // Check Swagbucks login status
   checkSwagbucksLoginStatus(1);
   // Retrieve the swagbuck balance
@@ -167,9 +169,51 @@ document.addEventListener('DOMContentLoaded', function () {
       password: password,
     });
   });
+
+  
+ /***********************************************Branded Surveys***************************************************************/
+
+  checkBrandedSurveyLoginStatus(1);
+
+  BrandedSurveysRetrieveAndDisplayBalance();
+
+  // Show login popup for Swagbucks when Connect button is clicked
+  brandedSurveyConnectButton.addEventListener('click', function () {
+    mainPopup.classList.add('hidden');
+    brandedSurveyLoginPopup.classList.remove('hidden');
+  });
+
+  // Handle canceling Swagbucks login
+  brandedSurveyCancelLoginButton.addEventListener('click', function () {
+    brandedSurveyLoginPopup.classList.add('hidden');
+    mainPopup.classList.remove('hidden');
+  });
+
+  // Handle submitting Swagbucks login credentials
+  brandedSurveySubmitLoginButton.addEventListener('click', async function () {
+    const email = document.getElementById('brandedSurveyEmail').value.trim();
+    const password = document.getElementById('brandedSurveyPassword').value.trim();
+    console.log(email, password);
+    if (!email || !password) {
+      alert('Please enter both email and password.');
+      return;
+    }
+
+    let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    chrome.runtime.sendMessage({
+      action: 'brandedsurvey_login',
+      tabId: tab.id,
+      user_id: userID,
+      email: email,
+      password: password,
+    });
+  });
+
+
 });
 
-/**************************************************************************************************************/
+
+/**********************************************Functions****************************************************************/
 
 async function checkSwagbucksLoginStatus(userID) {
   if (!userID) {
@@ -207,6 +251,7 @@ async function checkSwagbucksLoginStatus(userID) {
     swagbucksConnectButton.classList.remove('hidden');
   }
 }
+
 async function SwagbuckRetrieveAndDisplayBalance() {
   const swagbucksEarnings = document.getElementById('swagbucksEarnings');
   let user_id = 1; // Test
@@ -256,5 +301,94 @@ async function SwagbuckRetrieveAndDisplayBalance() {
     });
   } else {
     console.error('Element with ID "swagbucksEarnings" not found.');
+  }
+}
+
+async function checkBrandedSurveyLoginStatus(userID) {
+  if (!userID) {
+    console.error('No valid userID provided');
+    return;
+  }
+  try {
+    const response = await fetch(
+      `http://127.0.0.1:8000/api/surveys/user/?user_id=${userID}&survey_site=Branded_Survey`,
+      { method: 'GET' }
+    );
+
+    if (!response.ok) {
+      // Fetch the response text to diagnose the issue
+      const errorText = await response.text();
+      throw new Error(
+        `Network response was not ok: ${response.statusText}. ${errorText}`
+      );
+    }
+
+    const data = await response.json();
+
+    if (data && data.email && data.password) {
+      console.log('Branded Surveys data retrieved:', data);
+      brandedSurveyConnectButton.classList.add('hidden');
+      brandedSurveyEarnings.classList.remove('hidden');
+    } else {
+      console.log('User is not signed in to Branded Surveys.');
+      brandedSurveyEarnings.classList.add('hidden');
+      brandedSurveyConnectButton.classList.remove('hidden');
+    }
+  } catch (error) {
+    console.error('Error checking Branded Surveys login status:', error);
+    brandedSurveyEarnings.classList.add('hidden');
+    brandedSurveyConnectButton.classList.remove('hidden');
+  }
+}
+
+async function BrandedSurveysRetrieveAndDisplayBalance() {
+  const brandedSurveyEarnings = document.getElementById('brandedSurveyEarnings');
+  let user_id = 1; // Test
+  let survey_site = 'Branded_Survey'; // Ensure this matches what you need
+
+  if (brandedSurveyEarnings) {
+    chrome.storage.local.get(['brandedsurvey_balance'], async (result) => {
+      if (result.brandedsurvey_balance) {
+        const { balanceText, rawBalance } = result.brandedsurvey_balance;
+        const balance = parseInt(rawBalance, 10); // Ensure balance is an integer
+
+        // Display the balanceText in the UI
+        brandedSurveyEarnings.textContent = `Points: ${balanceText}`;
+
+        try {
+          console.log('Attempting to save credentials...');
+          console.log('Type of balance:', typeof balance);
+
+          const response = await fetch(
+            `http://127.0.0.1:8000/api/surveys/update_balance/?user_id=${user_id}&survey_site=${encodeURIComponent(
+              survey_site
+            )}&balance=${balance}`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              // No need for a body since we are using query parameters
+            }
+          );
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(
+              `Failed to save Branded Surveys: ${response.statusText} - ${errorText}`
+            );
+          }
+
+          console.log('Branded Surveys saved.');
+        } catch (error) {
+          console.error('Error saving Branded Surveys Earnings:', error);
+          // Optionally, notify the user about the error
+        }
+      } else {
+        brandedSurveyEarnings.textContent = 'Earnings: Not available';
+      }
+    });
+  } else {
+    console.error('Element with ID "brandedSurveyEarnings" not found.');
   }
 }

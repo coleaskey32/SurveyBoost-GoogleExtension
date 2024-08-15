@@ -1,57 +1,146 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Survey Boost</title>
-    <style>
-      .hidden {
-        display: none;
-      }
-      body {
-        width: 200px; /* Set the desired width */
-        height: 200px; /* Set the desired height */
-        padding: 20px; /* Optional: Add padding for better styling */
-      }
-    </style>
-  </head>
-  <body>
-    <div id="initial-popup" class="hidden">
-      <h1>Survey Boost Login</h1>
-      <input type="text" id="surveyBoostUsername" placeholder="Username" />
-      <input type="password" id="surveyBoostPassword" placeholder="Password" />
-      <button id="submitInitialLogin">Submit</button>
-    </div>
+<head>
+  <title>Survey Boost</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f8f8; /* Light teal background */
+      color: #333; /* Dark text color */
+      margin: 0;
+      padding: 40px; /* Increased padding for more space around the popup */
+      box-sizing: border-box;
+    }
 
-    <div id="main-popup" class="hidden">
-      <h1>Survey Boost</h1>
-      <div>
-        <h2>Survey Junkie</h2>
-        <button id="connectButton" class="hidden">Connect</button>
-        <h3 id="surveyJunkieEarnings" class="hidden">$0</h3>
-      </div>
-      <div>
-        <h2>Swagbucks</h2>
-        <button id="swagbucksConnectButton" class="hidden">Connect</button>
-        <h3 id="swagbucksEarnings" class="hidden">$0</h3>
-      </div>
-    </div>
+    .hidden {
+      display: none;
+    }
 
-    <div id="surveyJunkie-login-popup" class="hidden">
-      <h1>Survey Junkie Login</h1>
-      <input type="text" id="surveyJunkieEmail" placeholder="Email" />
-      <input type="password" id="surveyJunkiePassword" placeholder="Password" />
-      <button id="submitLogin">Submit</button>
-      <button id="cancelLogin">Cancel</button>
-    </div>
+    h1 {
+      color: #008080; /* Teal color */
+      margin-bottom: 40px; /* Increased space below the h1 tag */
+      padding-right: 30px; /* Move the h1 tag to the left */
+    }
 
-    <div id="swagbucks-login-popup" class="hidden">
-      <h1>Swagbucks Login</h1>
-      <input type="text" id="swagbucksEmail" placeholder="Email" />
-      <input type="password" id="swagbucksPassword" placeholder="Password" />
-      <button id="swagbucksSubmitLogin">Submit</button>
-      <button id="swagbucksCancelLogin">Cancel</button>
-    </div>
+    .popup {
+      background-color: #ffffff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      max-width: 1000px; /* Increased max-width of the popup */
+      margin: 0 auto;
+      width: 100%; /* Ensure the popup takes up full width */
+      box-sizing: border-box;
+    }
 
-    <script src="popup.js"></script>
-    <script src="storage.js"></script>
-  </body>
+    .popup div {
+      margin-bottom: 30px; /* Increased margin between rows */
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .popup h2 {
+      margin: 0;
+      color: #005757; /* Darker teal color */
+      flex: 1; /* Allow h2 to take available space */
+    }
+
+    .popup button {
+      background-color: #008080; /* Teal color */
+      color: #ffffff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-left: 20px; /* Space between the button and the text */
+    }
+
+    .popup button.hidden {
+      display: none;
+    }
+
+    .popup input {
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      width: calc(100% - 24px);
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+
+    .popup h3 {
+      margin: 0;
+      color: #008080; /* Teal color */
+      font-size: 18px;
+      flex: 1; /* Allow h3 to take available space */
+      text-align: right; /* Align text to the right */
+    }
+
+    .popup .balance {
+      color: #333;
+      font-weight: bold;
+    }
+
+    .popup .login-popup button {
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="initial-popup" class="hidden popup">
+    <h1>Survey Boost Login</h1>
+    <input type="text" id="surveyBoostUsername" placeholder="Username" />
+    <input type="password" id="surveyBoostPassword" placeholder="Password" />
+    <button id="submitInitialLogin">Submit</button>
+  </div>
+
+  <div id="main-popup" class="hidden popup">
+    <h1>Survey Boost</h1>
+    <div>
+      <h2>Survey Junkie</h2>
+      <button id="connectButton" class="hidden">Connect</button>
+      <h3 id="surveyJunkieEarnings" class="balance">$0</h3>
+    </div>
+    <div>
+      <h2>Swagbucks</h2>
+      <button id="swagbucksConnectButton" class="hidden">Connect</button>
+      <h3 id="swagbucksEarnings" class="balance">$0</h3>
+    </div>
+    <div>
+      <h2>Branded Surveys</h2>
+      <button id="brandedSurveyConnectButton" class="hidden">Connect</button>
+      <h3 id="brandedSurveyEarnings" class="balance">$0</h3>
+    </div>
+  </div>
+
+  <div id="surveyJunkie-login-popup" class="hidden popup">
+    <h1>Survey Junkie Login</h1>
+    <input type="text" id="surveyJunkieEmail" placeholder="Email" />
+    <input type="password" id="surveyJunkiePassword" placeholder="Password" />
+    <button id="submitLogin">Submit</button>
+    <button id="cancelLogin">Cancel</button>
+  </div>
+
+  <div id="swagbucks-login-popup" class="hidden popup">
+    <h1>Swagbucks Login</h1>
+    <input type="text" id="swagbucksEmail" placeholder="Email" />
+    <input type="password" id="swagbucksPassword" placeholder="Password" />
+    <button id="swagbucksSubmitLogin">Submit</button>
+    <button id="swagbucksCancelLogin">Cancel</button>
+  </div>
+
+  <div id="brandedSurvey-login-popup" class="hidden popup">
+    <h1>Branded Surveys Login</h1>
+    <input type="text" id="brandedSurveyEmail" placeholder="Email" />
+    <input type="password" id="brandedSurveyPassword" placeholder="Password" />
+    <button id="brandedSurveySubmitLogin">Submit</button>
+    <button id="brandedSurveyCancelLogin">Cancel</button>
+  </div>
+
+  <script src="popup.js"></script>
+  <script src="storage.js"></script>
+</body>
 </html>

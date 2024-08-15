@@ -75,6 +75,22 @@ function getBalance() {
   }
 }
 
+function startSurvey(email, password) {
+  console.log('Starting survey process...');
+
+  // Checking if we can access the homescreen
+  const homepageElement = document.querySelector('#sbContent');
+  
+  // If we cant then we need to login
+  if (!homepageElement) {
+    console.log("logging in...");
+    performLogin(email, password);
+  }
+  else {
+    console.log("it worked...");
+  }
+}
+
 // Function to send the result to the background script
 function sendLoginResult(success, email, password, user_id, message) {
   console.log('Sending login result:', success, email, password);
@@ -98,5 +114,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     checkHomepage(request.email, request.password, request.user_id);
   } else if (request.action === 'swagbuck-getBalance') {
     const balance = getBalance();
+  } else if (request.action === 'start_survey') {
+    startSurvey(request.email, request.password);
   }
 });

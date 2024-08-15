@@ -13,7 +13,8 @@
   "host_permissions": [
     "https://app.surveyjunkie.com/*",
     "http://127.0.0.1:8000/*",
-    "https://www.swagbucks.com/*"
+    "https://www.swagbucks.com/*",
+    "https://surveys.gobranded.com/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -26,6 +27,11 @@
     {
       "matches": ["*://www.swagbucks.com/*"],
       "js": ["content-swagbuck.js"],
+      "run_at": "document_end"
+    },
+    {
+      "matches": ["*://www.gobranded.com/*", "*://surveys.gobranded.com/*"],
+      "js": ["content-brandedsurvey.js"],
       "run_at": "document_end"
     }
   ],
