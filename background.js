@@ -558,7 +558,8 @@ const checkStartSurvey = async () => {
                     // Start the survey for the selected site
                     if (selectedSurveySite) {
                         startSurveyTemp(selectedSurveySite, user_id);
-
+                        // if survey.id === 1 and survey.running === true and not survey 2 
+                        //getAnswer(survey2) with some sort of long pooling 
                         // Decrement the queue count
                         queue -= 1;
                         console.log('Queue decremented. New queue value:', queue);
